@@ -2070,7 +2070,7 @@ em.search-keyword {
 /* Waline CSS*/
 #waline {
   /* 字体大小 */
-  --waline-font-size: 20px;
+  --waline-font-size: 18px;
   /* 常规颜色 */
   --waline-white: #fff;
   --waline-light-grey: #999;
