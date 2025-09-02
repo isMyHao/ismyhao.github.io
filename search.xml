@@ -4,7 +4,7 @@
   
     
     <entry>
-      <title>CommonsCollections1</title>
+      <title>CommonsCollections1-LazyMap</title>
       <link href="/2025/09/02/Java%E5%AE%89%E5%85%A8-CC1-LazyMap/"/>
       <url>/2025/09/02/Java%E5%AE%89%E5%85%A8-CC1-LazyMap/</url>
       
@@ -29,7 +29,7 @@
     
     
     <entry>
-      <title>CommonsCollections1</title>
+      <title>CommonsCollections1-TransformedMap</title>
       <link href="/2025/09/01/Java%E5%AE%89%E5%85%A8-CC1%E9%93%BE/"/>
       <url>/2025/09/01/Java%E5%AE%89%E5%85%A8-CC1%E9%93%BE/</url>
       
@@ -1008,7 +1008,7 @@
       <link href="/2025/06/17/Java%E5%AE%89%E5%85%A8-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
       <url>/2025/06/17/Java%E5%AE%89%E5%85%A8-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</url>
       
-        <content type="html"><![CDATA[<h1 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h1><p><strong>CC链</strong><br><font color=red>CommonsCollections(CC)</font>反序列化攻击链</p><ul><li>CC1攻击链：<a href="https://hackerhao.top/2025/09/01/Java%E5%AE%89%E5%85%A8-CC1%E9%93%BE/">AnnotationInvocationHandler + LazyMap&#x2F;TransformMap + Transformer</a></li><li>CC2攻击链：<a href="">PriorityQueue + TransformingComparator + Transformer + TemplatesImpl</a></li><li>CC3攻击链：<a href="">AnnotationInvocationHandler + Proxy + LazyMap + Transformer + TrAXFilter + TemplatesImpl</a></li><li>CC4攻击链：<a href="">PriorityQueue + TransformingComparator + TrAXFilter + TemplatesImpl</a></li><li>CC5攻击链：<a href="">BadAttributeValueExpException + TiedMapEntry + LazyMap + Transformer</a></li><li>CC6攻击链：<a href="">HashSet + HashMap + TiedMapEntry + LazyMap + Transformer</a></li><li>CC7攻击链：<a href="">HashTable + TiedMapEntry + LazyMap + Transformer</a></li></ul><p><strong>CB链</strong><br><font color=red>CommonsBeanUtils(CB)</font>反序列化攻击链</p><ul><li>CB1攻击链：<a href="">PriorityQueue + BeanComparator + TemplatesImpl</a></li></ul>]]></content>
+        <content type="html"><![CDATA[<h1 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h1><p><strong>CC链</strong><br><font color=red>CommonsCollections(CC)</font>反序列化攻击链</p><ul><li>CC1攻击链：<a href="https://hackerhao.top/2025/09/01/Java%E5%AE%89%E5%85%A8-CC1%E9%93%BE/">AnnotationInvocationHandler + LazyMap&#x2F;TransformedMap + Transformer</a></li><li>CC2攻击链：<a href="">PriorityQueue + TransformingComparator + Transformer + TemplatesImpl</a></li><li>CC3攻击链：<a href="">AnnotationInvocationHandler + Proxy + LazyMap + Transformer + TrAXFilter + TemplatesImpl</a></li><li>CC4攻击链：<a href="">PriorityQueue + TransformingComparator + TrAXFilter + TemplatesImpl</a></li><li>CC5攻击链：<a href="">BadAttributeValueExpException + TiedMapEntry + LazyMap + Transformer</a></li><li>CC6攻击链：<a href="">HashSet + HashMap + TiedMapEntry + LazyMap + Transformer</a></li><li>CC7攻击链：<a href="">HashTable + TiedMapEntry + LazyMap + Transformer</a></li></ul><p><strong>CB链</strong><br><font color=red>CommonsBeanUtils(CB)</font>反序列化攻击链</p><ul><li>CB1攻击链：<a href="">PriorityQueue + BeanComparator + TemplatesImpl</a></li></ul>]]></content>
       
       
       <categories>
